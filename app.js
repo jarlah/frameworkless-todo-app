@@ -1,9 +1,52 @@
+class Store {
+
+    initialStsate = {
+        nextId: 1,
+        todos: []
+    };
+
+    constructor() {
+        this.state = this.reducer(undefined, {})
+    }
+
+    reducer(state = this.initialStsate, action) {
+        switch (action.type) {
+            case "remove":
+                return {
+                    ...state,
+                    todos: state.todos.filter(todo => todo.id !== action.payload)
+                };
+            case "add":
+                return {
+                    ...state,
+                    todos: [
+                        ...state.todos,
+                        { id: state.nextId, text: action.payload }
+                    ],
+                    nextId: state.nextId + 1
+                };
+            default:
+                return state;
+        }
+    };
+
+    dispatch(action) {
+        this.state = this.reducer(this.state, action);
+    }
+
+    getState() {
+        return this.state;
+    }
+}
+
 const todoInput = getById("todoInput");
 const todoButton = getById("todoButton");
 const todoList = getByQuery("todoList");
 
+const store = new Store();
+
 function addTodo(todoText) {
-    dispatch({ type: "add", payload: todoText });
+    store.dispatch({ type: "add", payload: todoText });
 }
 
 function onAddTodo() {
@@ -14,7 +57,7 @@ function onAddTodo() {
 }
 
 function removeTodo(id) {
-    dispatch({ type: "remove", payload: id });
+    store.dispatch({ type: "remove", payload: id });
 }
 
 function onRemoveTodo(id) {
@@ -34,7 +77,7 @@ todoInput.addEventListener('keypress', function (e) {
 
 // Render operations
 function renderTodos() {
-    todoList.innerHTML = state.todos.map(createTodo).join("\n");
+    todoList.innerHTML = store.getState().todos.map(createTodo).join("\n");
 }
 
 function createTodo(todo) {
@@ -48,37 +91,4 @@ function getById(name) {
 
 function getByQuery(query) {
     return document.querySelector(query);
-}
-
-// Reducer stuff
-const initialStsate = {
-    nextId: 1,
-    todos: []
-};
-
-function reducer(state = initialStsate, action) {
-    switch (action.type) {
-        case "remove":
-            return {
-                ...state,
-                todos: state.todos.filter(todo => todo.id !== action.payload)
-            };
-        case "add":
-            return {
-                ...state,
-                todos: [
-                    ...state.todos,
-                    { id: state.nextId, text: action.payload }
-                ],
-                nextId: state.nextId + 1
-            };
-        default:
-            return state;
-    }
-}
-
-let state = reducer(undefined, {});
-
-function dispatch(action) {
-    state = reducer(state, action);
 }
