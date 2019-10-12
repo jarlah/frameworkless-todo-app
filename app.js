@@ -1,7 +1,6 @@
 class Store {
     stateKey = "state";
 
-    reducer;
     observers = [];
 
     constructor(reducer) {
