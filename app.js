@@ -1,34 +1,11 @@
 class Store {
+    state;
+    reducer;
 
-    initialStsate = {
-        nextId: 1,
-        todos: []
-    };
-
-    constructor() {
-        this.state = this.reducer(undefined, {})
+    constructor(reducer) {
+        this.reducer = reducer;
+        this.state = reducer(undefined, {})
     }
-
-    reducer(state = this.initialStsate, action) {
-        switch (action.type) {
-            case "remove":
-                return {
-                    ...state,
-                    todos: state.todos.filter(todo => todo.id !== action.payload)
-                };
-            case "add":
-                return {
-                    ...state,
-                    todos: [
-                        ...state.todos,
-                        { id: state.nextId, text: action.payload }
-                    ],
-                    nextId: state.nextId + 1
-                };
-            default:
-                return state;
-        }
-    };
 
     dispatch(action) {
         this.state = this.reducer(this.state, action);
@@ -43,7 +20,26 @@ const todoInput = getById("todoInput");
 const todoButton = getById("todoButton");
 const todoList = getByQuery("todoList");
 
-const store = new Store();
+const store = new Store((state = { nextId: 1, todos: [] }, action) => {
+    switch (action.type) {
+        case "remove":
+            return {
+                ...state,
+                todos: state.todos.filter(todo => todo.id !== action.payload)
+            };
+        case "add":
+            return {
+                ...state,
+                todos: [
+                    ...state.todos,
+                    { id: state.nextId, text: action.payload }
+                ],
+                nextId: state.nextId + 1
+            };
+        default:
+            return state;
+    }
+});
 
 function addTodo(todoText) {
     store.dispatch({ type: "add", payload: todoText });
