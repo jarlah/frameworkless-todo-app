@@ -1,18 +1,32 @@
 class Store {
     state;
     reducer;
+    observers = [];
 
     constructor(reducer) {
         this.reducer = reducer;
-        this.state = reducer(undefined, {})
+        this.state = reducer(undefined, {});
+        const instance = this;
+        this.handler = {
+            set: function (target, key, value) {
+                target[key] = value;
+                if (key === "state") {
+                    instance.observers.forEach(observer => {
+                        observer(value);
+                    })
+                }
+                return true;
+            },
+        };
+        this.proxy = new Proxy(this, this.handler);
     }
 
     dispatch(action) {
-        this.state = this.reducer(this.state, action);
+        this.proxy.state = this.reducer(this.state, action);
     }
 
-    getState() {
-        return this.state;
+    subscribe(observer) {
+        this.observers = [...this.observers, observer];
     }
 }
 
@@ -37,28 +51,20 @@ const store = new Store((state = { nextId: 1, todos: [] }, action) => {
     }
 });
 
+store.subscribe(renderTodos);
+
 const todoInput = getById("todoInput");
 const todoButton = getById("todoButton");
 const todoList = getByQuery("todoList");
 
-function addTodo(todoText) {
-    store.dispatch({ type: "add", payload: todoText });
-}
-
 function onAddTodo() {
-    addTodo(todoInput.value);
+    store.dispatch({ type: "add", payload: todoInput.value })
     todoInput.value = "";
-    renderTodos();
     todoInput.focus();
 }
 
-function removeTodo(id) {
-    store.dispatch({ type: "remove", payload: id });
-}
-
 function onRemoveTodo(id) {
-    removeTodo(id);
-    renderTodos();
+    store.dispatch({ type: "remove", payload: id });
     todoInput.focus();
 }
 
@@ -72,8 +78,8 @@ todoInput.addEventListener('keypress', function (e) {
 });
 
 // Render operations
-function renderTodos() {
-    todoList.innerHTML = store.getState().todos.map(createTodo).join("\n");
+function renderTodos(state) {
+    todoList.innerHTML = state.todos.map(createTodo).join("\n");
 }
 
 function createTodo(todo) {
