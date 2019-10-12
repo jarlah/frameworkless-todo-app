@@ -16,10 +16,6 @@ class Store {
     }
 }
 
-const todoInput = getById("todoInput");
-const todoButton = getById("todoButton");
-const todoList = getByQuery("todoList");
-
 const store = new Store((state = { nextId: 1, todos: [] }, action) => {
     switch (action.type) {
         case "remove":
@@ -40,6 +36,10 @@ const store = new Store((state = { nextId: 1, todos: [] }, action) => {
             return state;
     }
 });
+
+const todoInput = getById("todoInput");
+const todoButton = getById("todoButton");
+const todoList = getByQuery("todoList");
 
 function addTodo(todoText) {
     store.dispatch({ type: "add", payload: todoText });
