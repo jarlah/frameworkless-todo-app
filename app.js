@@ -3,8 +3,7 @@ const todoButton = getById("todoButton");
 const todoList = getByQuery("todoList");
 
 function addTodo(todoText) {
-    const action = { type: "add", payload: todoText };
-    state = reducer(state, action);
+    dispatch({ type: "add", payload: todoText });
 }
 
 function onAddTodo() {
@@ -15,8 +14,7 @@ function onAddTodo() {
 }
 
 function removeTodo(id) {
-    const action = { type: "remove", payload: id };
-    state = reducer(state, action);
+    dispatch({ type: "remove", payload: id });
 }
 
 function onRemoveTodo(id) {
@@ -80,3 +78,7 @@ function reducer(state = initialStsate, action) {
 }
 
 let state = reducer(undefined, {});
+
+function dispatch(action) {
+    state = reducer(state, action);
+}
