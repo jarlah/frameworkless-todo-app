@@ -1,5 +1,6 @@
 class Store {
-    state;
+    stateKey = "state";
+
     reducer;
     observers = [];
 
@@ -9,7 +10,7 @@ class Store {
         this.proxy = new Proxy(this, {
             set: (target, key, value) => {
                 target[key] = value;
-                if (key === "state") {
+                if (key === this.stateKey) {
                     this.observers.forEach(observer => {
                         observer(value);
                     })
@@ -20,7 +21,7 @@ class Store {
     }
 
     dispatch(action) {
-        this.proxy.state = this.reducer(this.state, action);
+        this.proxy[this.stateKey] = this.reducer(this.state, action);
     }
 
     subscribe(observer) {
