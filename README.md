@@ -12,3 +12,5 @@ I have only used JavaScript, css and html.
     serve -s .
 
 open http://localhost:5000
+
+![Example on how it looks](example.png)
