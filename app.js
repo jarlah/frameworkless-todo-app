@@ -1,3 +1,7 @@
+const todoInput = getById("todoInput");
+const todoButton = getById("todoButton");
+const todoList = getByQuery("todoList");
+
 class Store {
     stateKey = "state";
 
@@ -5,7 +9,6 @@ class Store {
 
     constructor(reducer) {
         this.reducer = reducer;
-        this.state = reducer(undefined, {});
         this.proxy = new Proxy(this, {
             set: (target, key, value) => {
                 target[key] = value;
@@ -20,11 +23,22 @@ class Store {
     }
 
     dispatch(action) {
-        this.proxy[this.stateKey] = this.reducer(this.state, action);
+        if (!this.initialized) {
+            throw new Error("Store is not initialized. Run init method after constructing store.");
+        }
+        this.proxy[this.stateKey] = this.reducer(this[this.stateKey], action);
     }
 
     subscribe(observer) {
+        if (this.initialized) {
+            console.warn("Adding observer after initializing store will not give observers a chance to render initial state");
+        }
         this.observers = [...this.observers, observer];
+    }
+
+    init() {
+        this.initialized = true;
+        this.dispatch({});
     }
 }
 
@@ -51,9 +65,7 @@ const store = new Store((state = { nextId: 1, todos: [] }, action) => {
 
 store.subscribe(renderTodos);
 
-const todoInput = getById("todoInput");
-const todoButton = getById("todoButton");
-const todoList = getByQuery("todoList");
+store.init();
 
 function onAddTodo() {
     store.dispatch({ type: "add", payload: todoInput.value })
