@@ -6,19 +6,17 @@ class Store {
     constructor(reducer) {
         this.reducer = reducer;
         this.state = reducer(undefined, {});
-        const instance = this;
-        this.handler = {
-            set: function (target, key, value) {
+        this.proxy = new Proxy(this, {
+            set: (target, key, value) => {
                 target[key] = value;
                 if (key === "state") {
-                    instance.observers.forEach(observer => {
+                    this.observers.forEach(observer => {
                         observer(value);
                     })
                 }
                 return true;
             },
-        };
-        this.proxy = new Proxy(this, this.handler);
+        });
     }
 
     dispatch(action) {
